@@ -6,8 +6,9 @@ import os
 
 # --- Manejo Dinámico de Rutas ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-service_account = 'kointrol-team@kointrol-ai.iam.gserviceaccount.com'
-key_file = os.path.join(BASE_DIR, "kointrol-ai-218d7c03278d.json")
+# Credenciales configurables por variables de entorno (la llave .json nunca se sube al repositorio)
+service_account = os.getenv('GEE_SERVICE_ACCOUNT', 'kointrol-team@kointrol-ai.iam.gserviceaccount.com')
+key_file = os.getenv('GEE_KEY_FILE', os.path.join(BASE_DIR, "kointrol-ai-218d7c03278d.json"))
 
 credentials = ee.ServiceAccountCredentials(service_account, key_file)
 ee.Initialize(credentials)

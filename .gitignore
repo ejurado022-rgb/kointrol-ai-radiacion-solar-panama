@@ -1,3 +1,19 @@
-__pycache__
-*.zip
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Entornos virtuales
+venv/
+.venv/
+env/
+
+# Credenciales de Google Earth Engine (NUNCA subir)
 kointrol-ai-218d7c03278d.json
+*service-account*.json
+.env
+
+# Otros
+*.zip
+.DS_Store
+Thumbs.db

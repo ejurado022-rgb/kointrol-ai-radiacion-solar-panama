@@ -1,178 +1,279 @@
-# Modelo de red neuronal para la predicción de radiación solar en Panamá usando variables climáticas (MRNS)
+<div align="center">
 
-> **Actualización Hackathon SIC 2025:** Este proyecto ha sido actualizado para integrar conexión en tiempo real con satélites y predicción en vivo.
+<img src="docs/assets/banner.svg" alt="Kointrol.AI — Predicción de radiación solar en Panamá. 3er lugar, Hackathon Samsung Innovation Campus 2025" width="100%"/>
 
-**MRNS** es una aplicación de escritorio desarrollada en **Python** cuyo objetivo principal es predecir la radiación solar neta en Panamá a nivel de corregimiento y coordenadas específicas, utilizando datos climáticos procesados por una Red Neuronal (NN).
+<br/>
+
+![3er Lugar](https://img.shields.io/badge/🥉_3er_Lugar-Hackathon_SIC_2025-cd7f32?style=for-the-badge)
+![Samsung Innovation Campus](https://img.shields.io/badge/Samsung_Innovation_Campus-2025_·_Panamá-1428A0?style=for-the-badge)
+
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-Keras-FF6F00?style=flat-square&logo=tensorflow&logoColor=white)
+![Google Earth Engine](https://img.shields.io/badge/Google_Earth_Engine-API-4285F4?style=flat-square&logo=google-earth&logoColor=white)
+![Plotly](https://img.shields.io/badge/Plotly-Mapas-3F4F75?style=flat-square&logo=plotly&logoColor=white)
+![GeoPandas](https://img.shields.io/badge/GeoPandas-Geoespacial-139C5A?style=flat-square)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-Escalado-F7931E?style=flat-square&logo=scikit-learn&logoColor=white)
+
+**Una aplicación de escritorio que usa inteligencia artificial y datos satelitales para estimar cuánta energía solar recibe cualquier punto de Panamá.**
+
+[Problema](#-el-problema) · [Solución](#-la-solución) · [Demo](#-la-aplicación) · [Modelo](#-el-modelo) · [Instalación](#-instalación) · [Equipo](#-equipo)
+
+</div>
 
 ---
 
-## Descripción General
+## 🏆 Reconocimiento
 
-El proyecto aborda la pregunta clave: **"¿Cómo afecta el clima a la generación de paneles solares?"**
+Este proyecto obtuvo el **3er lugar en la Hackathon del Samsung Innovation Campus (SIC) 2025 — Panamá**, como parte del Proyecto Final del Módulo de Inteligencia Artificial.
 
-Para responder a esto, el sistema se enfoca en:
-1.  **Mapear** todo el país con datos climáticos por coordenadas.
-2.  Utilizar un **modelo de Red Neuronal** entrenado para predecir la radiación solar neta (variable clave para la generación de energía fotovoltaica).
-3.  **Visualizar** los resultados a nivel de corregimiento en un mapa interactivo.
-
-La aplicación integra la visualización de los resultados del modelo con una interfaz moderna y funcionalidades de predicción por punto geográfico.
+Nació como proyecto final del curso y, durante la hackathon, el equipo lo llevó más allá: pasó de un predictor de demostración a un sistema que **se conecta en vivo con Google Earth Engine**, construye las variables del modelo en tiempo real y **valida cada predicción contra el dato satelital real**.
 
 ---
 
-![Diagrama de flujo del procesamiento de datos](Proyecto_final_SIC_2025/Visualization/diagram.png)
+## 🌎 El problema
 
-## ⚙️ Instalación y Requisitos
+> **¿Cómo afecta el clima a la generación de los paneles solares?**
 
-Para ejecutar **MRNS** en tu entorno local, sigue estos pasos:
+Panamá, por su ubicación tropical, recibe altos niveles de radiación solar, pero la nubosidad, la humedad y la lluvia hacen que esa radiación varíe mucho de un lugar a otro y de un día a otro. No existen herramientas accesibles para estimarla en un punto concreto del país, lo que dificulta planificar:
 
-### Prerrequisitos
-* **Python 3.10** o superior.
-* **Git** instalado.
-* Credenciales de Google Earth Engine (Archivo JSON de cuenta de servicio).
+- ☀️ **Proyectos de energía solar** — dónde instalar y cuánto se puede generar.
+- 🌾 **Agricultura** — riego, cultivos y planificación de temporadas.
+- 🌿 **Gestión ambiental** — estudios climáticos y educación.
 
-### Pasos de Instalación
+## 💡 La solución
 
-1.  **Clonar el repositorio:**
-    ```bash
-    git clone [https://github.com/fundestddelgado/PA12-KOINTROL.IA-PROYECTO-FINAL.git](https://github.com/fundestddelgado/PA12-KOINTROL.IA-PROYECTO-FINAL.git)
-    cd PA12-KOINTROL.IA-PROYECTO-FINAL
-    ```
+**Kointrol.AI** combina una **red neuronal** entrenada con datos climáticos históricos con **datos satelitales en tiempo real**:
 
-2.  **Crear y activar un entorno virtual (Recomendado):**
-    ```bash
-    # En Windows
-    python -m venv venv
-    .\venv\Scripts\activate
+1. **Mapea todo el país** con variables climáticas por coordenada (128 000 registros).
+2. **Predice la radiación solar neta** con un modelo de red neuronal densa (R² = 0.98).
+3. **Visualiza los resultados por corregimiento** en un mapa interactivo.
+4. **Predice en vivo para cualquier punto**: el usuario elige una provincia y un corregimiento (o escribe coordenadas), la app consulta Google Earth Engine, calcula las variables y muestra la predicción junto al valor real medido por satélite.
 
-    # En macOS/Linux
-    python3 -m venv venv
-    source venv/bin/activate
-    ```
+```mermaid
+flowchart LR
+    A["🛰️ Google Earth Engine<br/>ERA5-Land · ERA5 · SRTM"] --> B["⚙️ feature_generator<br/>16 variables derivadas"]
+    B --> C["📏 StandardScaler"]
+    C --> D["🧠 Red neuronal<br/>TensorFlow / Keras"]
+    D --> E["☀️ Radiación predicha<br/>MJ/m²/día"]
+    A --> F["📡 Dato satelital real"]
+    E --> G["⚖️ Comparación y<br/>confianza del modelo"]
+    F --> G
+    G --> H["🖥️ Interfaz Tkinter"]
+    I["🗺️ Dataset histórico<br/>AgERA5 · ERA5-Land"] --> D
+    D --> J["🗺️ Mapa por corregimiento<br/>Plotly + GeoPandas"]
+```
 
-3.  **Instalar dependencias:**
-    ```bash
-    pip install -r requirements.txt
-    ```
+---
 
-4.  **Configurar Credenciales de Google Earth Engine:**
-    * Este proyecto requiere una llave de cuenta de servicio (`.json`) para acceder a la API de GEE.
-    * Coloca tu archivo de credenciales (ej. `kointrol-ai-xxxx.json`) en la carpeta `Hackaton_SIC_2025/modulos_gee/`.
-    * *Nota: Asegúrate de que el nombre del archivo coincida con el especificado en `modulos_gee.py` o actualiza la ruta en el código.*
+## 🖥️ La aplicación
 
-### 🚀 Ejecución
+<table>
+  <tr>
+    <td width="50%" align="center"><b>Predictor en tiempo real</b></td>
+    <td width="50%" align="center"><b>Menú principal</b></td>
+  </tr>
+  <tr>
+    <td><img src="docs/assets/app-predictor.png" alt="Predictor por coordenadas: predicción de 11.08 MJ/m²/día frente a un dato real de 9.30 MJ/m²/día en Montijo, Veraguas"/></td>
+    <td><img src="docs/assets/app-mapa.png" alt="Pestaña del mapa por corregimiento en la interfaz Tkinter"/></td>
+  </tr>
+  <tr>
+    <td>Selecciona provincia y corregimiento (o coordenadas). La app descarga el clima del satélite, predice la radiación y la compara con el valor real.</td>
+    <td>Interfaz de escritorio organizada en pestañas: mapa nacional y predictor por punto.</td>
+  </tr>
+</table>
 
-Para iniciar la aplicación, ejecuta el siguiente comando desde la raíz del proyecto:
+### Mapa de radiación solar por corregimiento
+
+<img src="Proyecto_final_SIC_2025/Visualization/diagram.png" alt="Mapa de Panamá con la radiación solar neta promedio predicha por corregimiento, de verde (menor) a rojo (mayor)" width="100%"/>
+
+<p align="center"><i>Radiación solar neta diaria promedio predicha por la red neuronal para los corregimientos de Panamá (J/m²).</i></p>
+
+<details>
+<summary><b>🔍 Ver más: mapa web interactivo, y predicción frente a realidad</b></summary>
+<br/>
+
+**Mapa web interactivo**, con selector de variables climáticas:
+
+<img src="docs/assets/mapa-web.jpg" alt="Mapa web interactivo de radiación solar y variables climáticas de Panamá" width="100%"/>
+
+| Predicción del modelo | Valor real (satélite) |
+| :---: | :---: |
+| <img src="Proyecto_final_SIC_2025/Visualization/pred_map.png" alt="Mapa de radiación predicha"/> | <img src="Proyecto_final_SIC_2025/Visualization/real_map.png" alt="Mapa de radiación real"/> |
+
+</details>
+
+---
+
+## 🧠 El modelo
+
+Red neuronal densa construida con **TensorFlow/Keras**, entrenada con datos climáticos diarios de enero a junio de 2025 de todo Panamá.
+
+<table>
+<tr>
+<td width="55%" valign="top">
+
+| Bloque | Capas | Unidades |
+| :--- | :--- | :---: |
+| Entrada | `Dense` + `BatchNorm` | 128 |
+| Bloque 1 | `Dense` + `BatchNorm` + `Dropout(0.1)` | 256 |
+| Bloque 2 | `Dense` + `BatchNorm` | 256 |
+| Bloque 3 | `Dense` + `BatchNorm` + `Dropout(0.05)` | 128 |
+| Final | `Dense` | 64 → 32 |
+| Salida | `Dense` (lineal) | 1 |
+
+- **Activación:** GELU · **Regularización:** L2 (1e-6)
+- **Optimizador:** Adam (lr = 3e-4) · **Pérdida:** MSE
+
+| Métrica (validación) | Valor |
+| :--- | :---: |
+| **R²** | **0.9806** |
+| MAE | ≈ 0.33 MJ/m²/día |
+| RMSE | ≈ 0.48 MJ/m²/día |
+| MAPE | 32.41 % |
+
+</td>
+<td width="45%" valign="top" align="center">
+<img src="Proyecto_final_SIC_2025/Visualization/results.png" alt="Gráfico de dispersión de valores reales frente a predichos, alineados en la diagonal"/>
+<br/><i>Real vs. predicción (J/m²)</i>
+</td>
+</tr>
+</table>
+
+### Variables del modelo (16 *features*)
+
+| Grupo | Variables |
+| :--- | :--- |
+| 🌦️ **Clima** | Nubosidad media 24 h · Humedad relativa · Temperatura a 2 m (°C) · Precipitación total · Presión superficial |
+| 🏔️ **Terreno** | Elevación (SRTM) |
+| 📍 **Ubicación** | `sin`/`cos` de latitud y longitud |
+| 📅 **Estacionalidad** | `sin`/`cos` del día del año · día del año normalizado |
+| 🔁 **Memoria** | Radiación del día anterior (*lag 1*) |
+| ➗ **Derivadas** | Índice temperatura-humedad · Relación nubosidad/presión |
+
+**Variable objetivo:** `surface_net_solar_radiation_sum`, la radiación solar neta que llega a la superficie (J/m²).
+
+### Fuentes de datos
+
+| Fuente | Uso |
+| :--- | :--- |
+| **AgERA5** y **ERA5-Land** (Copernicus / ECMWF) | Dataset histórico de entrenamiento: 128 000 registros |
+| **ERA5-Land Daily** y **ERA5 Hourly** vía Google Earth Engine | Consultas climáticas en tiempo real |
+| **SRTM** (USGS) | Elevación del terreno |
+| **Límites de corregimientos de Panamá** (GeoJSON) | Agregación y visualización por corregimiento |
+
+---
+
+## 📁 Estructura del proyecto
+
+```
+kointrol-ai-radiacion-solar-panama/
+├── Hackaton_SIC_2025/              # 🏆 Versión de la hackathon (tiempo real)
+│   ├── interfaz.py                 # Aplicación de escritorio (punto de entrada)
+│   ├── Panama_Boundaries.geojson   # Provincias y corregimientos para los selectores
+│   └── modulos_gee/
+│       ├── modulos_gee.py          # Conexión y consultas a Google Earth Engine
+│       └── feature_generator.py    # Ingeniería de características en vivo
+│
+├── Proyecto_final_SIC_2025/        # 📚 Proyecto final del módulo de IA
+│   ├── Cleaning and Testing/       # Unión, limpieza y diagnóstico de datasets
+│   ├── Datasets/                   # Datos climáticos, predicciones y límites geográficos
+│   ├── Models/
+│   │   ├── Trainings.ipynb         # Entrenamiento de la red neuronal
+│   │   ├── predict.py              # Inferencia
+│   │   ├── solar_model.keras       # Modelo entrenado
+│   │   └── *.pkl                   # Escaladores y normalización del objetivo
+│   ├── Visualization/              # Mapas, matriz de correlación y gráficas
+│   └── solar_radiation_map_cache.html  # Mapa interactivo ya generado
+│
+├── docs/assets/                    # Banner y capturas para este README
+└── requirements.txt
+```
+
+---
+
+## 🚀 Instalación
+
+### Requisitos previos
+
+- **Python 3.10** o superior (Tkinter viene incluido en Python para Windows y macOS)
+- Una **cuenta de servicio de Google Earth Engine** con su llave `.json`, solo para el predictor en tiempo real
+
+### Pasos
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/ejurado022-rgb/kointrol-ai-radiacion-solar-panama.git
+cd kointrol-ai-radiacion-solar-panama
+
+# 2. Crear y activar un entorno virtual
+python -m venv venv
+venv\Scripts\activate          # Windows
+# source venv/bin/activate     # macOS / Linux
+
+# 3. Instalar dependencias
+pip install -r requirements.txt
+```
+
+### Configurar Google Earth Engine
+
+El predictor en tiempo real necesita una cuenta de servicio de GEE. Indica la ruta de tu llave con variables de entorno:
+
+```bash
+# Windows (PowerShell)
+$env:GEE_KEY_FILE = "C:\ruta\a\tu-llave.json"
+$env:GEE_SERVICE_ACCOUNT = "tu-cuenta@tu-proyecto.iam.gserviceaccount.com"
+
+# macOS / Linux
+export GEE_KEY_FILE="/ruta/a/tu-llave.json"
+export GEE_SERVICE_ACCOUNT="tu-cuenta@tu-proyecto.iam.gserviceaccount.com"
+```
+
+> [!WARNING]
+> Nunca subas tu llave `.json` al repositorio. El `.gitignore` ya la excluye.
+
+### Ejecutar
+
+Desde la raíz del proyecto:
 
 ```bash
 python Hackaton_SIC_2025/interfaz.py
-  ```
+```
 
-## Arquitectura y Flujo de Datos
-
-El proyecto se estructura en tres fases principales: **Datos**, **Modelo** e **Interfaz**.
-
-## Recopilación y Variables del Estudio
-
-### 1. Recopilación y Procesamiento de Datos
-
-* **Fuente de Datos:** La información climática se recopiló utilizando **Google Earth Engine** (Dataset AgEra5 para entrenamiento y ERA5-Land para consultas en tiempo real).
-* **Volumen:** Se integró un *dataset* histórico de **128,000 puntos de datos**.
-* **Procesamiento:** Los datos fueron procesados, limpiados e integrados utilizando coordenadas de latitud y longitud.
+> [!TIP]
+> Para ver el mapa nacional sin configurar nada, abre `Proyecto_final_SIC_2025/solar_radiation_map_cache.html` en tu navegador.
 
 ---
 
-### Variables Utilizadas en el Estudio
+## 👥 Equipo
 
-Las siguientes variables climáticas fueron extraídas, procesadas y utilizadas como *features* (características) para el análisis y modelado del estudio.
+**Equipo PA12 — Kointrol.AI** · Samsung Innovation Campus 2025, Panamá
 
-| Variable | Tipo de Dato | Propósito |
-| :--- | :--- | :--- |
-| **date** | Categórica (Fecha) | Permite la indexación y el análisis temporal. |
-| **lon / lat** | Numérica | Define la ubicación espacial. |
-| **elevation** | Numérica (Metros) | Representa la altitud, influye en temperatura y presión. |
-| **Cloud_Cover_Mean_24h** | Numérica (Fracción) | Mide la nubosidad promedio (factor crítico). |
-| **Temperature_Air_2m** | Numérica (Kelvin/C) | Temperatura del aire a 2m. |
-| **relative_humidity** | Numérica (%) | Cantidad de vapor de agua en el aire. |
-| **surface_pressure** | Numérica (Pascal) | Presión en la superficie terrestre. |
-| **total_precipitation** | Numérica (Metros) | Cantidad acumulada de lluvia. |
-| **surface_net_solar_radiation (target)** | Numérica ($J/m^2$) | **Variable objetivo**: Energía solar neta recibida. |
-
----
-
-### 2. Modelo de Red Neuronal (NN)
-
-Se utilizó **TensorFlow/Keras** para construir y entrenar una Red Neuronal densa.
-
-* **Arquitectura del Modelo:**
-
-| Capa / Bloque | Tipo de Capa | Unidades | Detalles |
-| :--- | :--- | :--- | :--- |
-| **Inicial** | `Dense` + `BatchNorm` | 128 | Entrada escalada |
-| **Bloque 1** | `Dense` + `BatchNorm` + `Dropout` | 256 | Regularización L2 |
-| **Bloque 2** | `Dense` + `BatchNorm` | 256 | Activación GELU |
-| **Bloque 3** | `Dense` + `BatchNorm` + `Dropout` | 128 | Dropout (0.05) |
-| **Salida** | `Dense` | 1 | Predicción Lineal |
-
-* **Métricas de Rendimiento (Validación):**
-    * **R² (Coeficiente de Determinación):** 0.9806
-    * **MAPE:** 32.41%
-
-![Diagrama de flujo del procesamiento de datos](Proyecto_final_SIC_2025/Visualization/results.png)
----
-
-### 3. Interfaz de Usuario (UI) y Visualización
-
-La aplicación utiliza **Tkinter** para la interfaz de escritorio, organizada en pestañas.
-
-* **Pestaña 1: Mapa por Corregimiento**
-    * Utiliza **Plotly Express** y **GeoPandas** para generar un mapa interactivo de Panamá.
-    * El mapa se abre en un navegador web o visor externo para garantizar interactividad completa (zoom, hover).
-
-* **Pestaña 2: Predictor por Coordenadas (Actualización Hackathon)**
-    * **Funcionalidad:** Permite ingresar coordenadas o seleccionar Provincia/Corregimiento.
-    * **Backend:** Conecta en tiempo real a la API de Google Earth Engine.
-    * **Proceso:** Extrae las condiciones climáticas de los últimos 20 días para el punto seleccionado, las procesa y alimenta el modelo neuronal.
-    * **Resultado:** Muestra la radiación predicha por la IA y la compara con el dato real satelital para validar la precisión.
-
----
-
-## Estructura y Módulos Principales
-
-El proyecto sigue una estructura modular:
-
-* **`interfaz.py`** → Control central de la aplicación (Tkinter).
-* **`Hackaton_SIC_2025/`** → Módulos nuevos de conexión en tiempo real.
-    * **`modulos_gee.py`** → Conexión con API de Google Earth Engine.
-    * **`feature_generator.py`** → Ingeniería de características en vivo.
-* **`Visualization/`** → Generación de mapas y manejo de GeoJSON.
-* **`Models/`** → Archivos del modelo (`.keras`) y escaladores (`.pkl`).
-
----
-
-## Librerías Utilizadas
-
-| Librería | Función Principal |
+| Integrante | Rol |
 | :--- | :--- |
-| **tkinter** | Interfaz gráfica de escritorio |
-| **earthengine-api** | Conexión satelital (Hackathon) |
-| **pandas / geopandas** | Manejo de datos y operaciones espaciales |
-| **plotly** | Mapas interactivos |
-| **tensorflow** | Inferencia del modelo de Red Neuronal |
-| **scikit-learn** | Escalado de datos (StandardScaler) |
+| **Alan Sánchez** · [@alanmuskk](https://github.com/alanmuskk) | Líder del proyecto. Modelo de red neuronal, arquitectura, interfaz y entrega final |
+| **Abdiel Bernal** · [@PalInstagram](https://github.com/PalInstagram) | Visualización de datos: mapas con GeoPandas y Plotly, límites geográficos |
+| **Ernesto Jurado** · [@ejurado022-rgb](https://github.com/ejurado022-rgb) | Base de la interfaz de usuario en Tkinter y continuidad del diseño |
+| **Ana Flores** · [@anappp15](https://github.com/anappp15) | Datos climáticos, conexión con la API de Google Earth Engine y modularización |
 
 ---
 
-## Equipo de Desarrollo (SIC 2025 - PA12)
+## 🙏 Agradecimientos
 
-| Nombre | Rol o Función |
-| :--- | :--- |
-| **Alan Sánchez** | Líder de Proyecto / Desarrollador Principal (Modelo NN y UI) |
-| **Abdiel Bernal** | Desarrollador de Visualización de Datos (Mapeo GeoPandas/Plotly) |
-| **Ernesto Jurado** | Desarrollador de la Interfaz de Usuario (Tkinter/Funcionalidades Predictor) |
-| **Ana Flores** | Desarrolladora de la Base de Datos y Documentación (Procesamiento de Datos) |
+A **Samsung Innovation Campus**, por la formación en Python e Inteligencia Artificial que hizo posible este proyecto y por organizar la Hackathon SIC 2025, donde obtuvimos el **3er lugar**.
+
+A los **docentes y tutores del programa SIC 2025 en Panamá**, por su acompañamiento durante el desarrollo.
+
+Este repositorio conserva el historial completo del [repositorio oficial del programa](https://github.com/fundestddelgado/PA12-KOINTROL.IA-PROYECTO-FINAL), donde se desarrolló originalmente, con los commits de cada integrante.
 
 ---
 
-## Créditos
+<div align="center">
 
-Proyecto desarrollado como parte del programa **Samsung Innovation Campus (SIC) 2025** - Región de Panamá.
+<sub>Proyecto académico desarrollado en el marco de <b>Samsung Innovation Campus 2025</b>. Samsung y Samsung Innovation Campus son marcas de sus respectivos titulares. Este repositorio no es un producto oficial de Samsung.<br/>
+La aplicación es una herramienta de apoyo; para decisiones críticas (inversiones energéticas, planificación agrícola) complementa sus resultados con asesoría profesional.</sub>
+
+<br/><br/>
+
+**☀️ Hecho en Panamá con datos, satélites y redes neuronales.**
+
+</div>
